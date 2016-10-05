@@ -1,0 +1,17 @@
+--
+ - hosts: compute
+   tasks:
+   - name: Install packages
+     apt: name={{ item }}
+     with_items:
+       - swift
+       - python-swiftclient
+       - swift-account
+       - swift-container
+       - swift-object
+   - name: create configuration files
+     template: src=roles/swift/templates/{{service}}-server.conf dest=/etc/swift/{{service}}-server.conf
+     with_service:
+       - account
+       - container
+       - object
