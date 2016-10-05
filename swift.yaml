@@ -1,4 +1,8 @@
 ---
+- hosts: all
+  tasks:
+  - name: create configuration files
+    template: src=role/swift/templates/rsyncd.conf dest=/etc/rsyncd.conf 
 - hosts: compute
   tasks:
   - name: Install packages
@@ -15,8 +19,6 @@
     template: src=role/swift/templates/container-server.conf dest=/etc/swift/container-server.conf owner=swift group=swift
   - name: create configuration files
     template: src=role/swift/templates/object-server.conf dest=/etc/swift/object-server.conf owner=swift group=swift
-  - name: create configuration files
-    template: src=role/swift/templates/rsyncd.conf dest=/etc/rsyncd.conf 
   - name: create configuration files
     template: src=role/swift/templates/swift.conf dest=/etc/swift/swift.conf
   - name: create ring synchorize script
