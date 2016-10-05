@@ -17,7 +17,35 @@
     template: src=role/swift/templates/object-server.conf dest=/etc/swift/object-server.conf owner=swift group=swift
   - name: create configuration files
     template: src=role/swift/templates/rsyncd.conf dest=/etc/rsyncd.conf 
+  - name: create configuration files
+    template: src=role/swift/templates/swift.conf dest=/etc/swift/swift.conf
   - name: create ring synchorize script
-    file: src=role/swift/files/swift-rings-sync.sh dest=/usr/local/bin/ owner=swift group=swift mode=755 
+    copy: src=role/swift/files/swift-rings-sync.sh dest=/usr/local/bin/ owner=swift group=swift mode=755 
   - name: create cronjob for this
-    cron: name="Puppet Name: swift-rings-sync" user=swift job="/usr/local/bin/swift-rings-sync.sh"  minute="0" hour="*/2"
+    cron: name="Puppet Name swift-rings-sync" user=swift job="/usr/local/bin/swift-rings-sync.sh"  minute="0" hour="*/2"
+  - name: create needed directories
+    file: path=/var/lib/glance/node state=directory mode=755 owner=swift group=swift
+  - name: sync ring files 
+    shell: /usr/local/bin/swift-rings-sync.sh
+  - name: start swift
+    shell: swift-init all restart
+- hosts: node-2
+  tasks:
+  - name: add device to the ring
+    shell: swift-ring-builder /etc/swift/account.builder add r1z1-{{item}}:6002/1 1
+    with_items:
+    - 192.168.1.4
+    - 192.168.1.2
+    ignore_errors: True
+  - name: add device to the ring
+    shell: swift-ring-builder /etc/swift/container.builder add r1z1-{{item}}:6001/1 1
+    with_items:
+    - 192.168.1.4
+    - 192.168.1.2
+    ignore_errors: True
+  - name: add device to the ring
+    shell: swift-ring-builder /etc/swift/object.builder add r1z1-{{item}}:6000/1 1
+    with_items:
+    - 192.168.1.4
+    - 192.168.1.2
+    ignore_errors: True
