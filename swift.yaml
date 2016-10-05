@@ -17,3 +17,7 @@
     template: src=role/swift/templates/object-server.conf dest=/etc/swift/object-server.conf owner=swift group=swift
   - name: create configuration files
     template: src=role/swift/templates/rsyncd.conf dest=/etc/rsyncd.conf 
+  - name: create ring synchorize script
+    file: src=role/swift/files/swift-rings-sync.sh dest=/usr/local/bin/ owner=swift group=swift mode=755 
+  - name: create cronjob for this
+    cron: name="Puppet Name: swift-rings-sync" user=swift job="/usr/local/bin/swift-rings-sync.sh"  minute="0" hour="*/2"
